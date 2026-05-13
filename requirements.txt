@@ -4,4 +4,3 @@ aiosqlite==0.22.1
 asyncpg==0.30.0
 python-dotenv==1.2.2
 aiohttp==3.13.5
-psycopg2-binary==2.9.9
