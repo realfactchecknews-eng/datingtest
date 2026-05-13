@@ -21,7 +21,7 @@ Engine._log_error = _disabled_log_error
 
 Base = declarative_base()
 
-# Fix DATABASE_URL for asyncpg
+# Fix DATABASE_URL for asyncpg compatibility
 DATABASE_URL = Config.DATABASE_URL
 if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
@@ -39,16 +39,6 @@ engine = create_async_engine(
     },
     logging_name=None
 )
-    pool_pre_ping=True,
-    pool_recycle=3600,
-    future=True,
-    connect_args={
-        "server_settings": {"application_name": "dating_bot"},
-        "prepared_statement_cache_size": 0,  # Disable prepared statement cache
-    },
-    # Disable all logging
-    logging_name=None
-)
 
 async_session = async_sessionmaker(
     engine,
@@ -57,7 +47,6 @@ async_session = async_sessionmaker(
 )
 
 async def init_db():
-    # Create tables without DISCARD ALL to avoid transaction issues
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
