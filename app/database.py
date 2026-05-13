@@ -21,10 +21,24 @@ Engine._log_error = _disabled_log_error
 
 Base = declarative_base()
 
+# Fix DATABASE_URL for asyncpg
+DATABASE_URL = Config.DATABASE_URL
+if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 engine = create_async_engine(
-    Config.DATABASE_URL,
-    echo=False,  # Disable SQL logging to prevent recursion errors
-    echo_pool=False,  # Disable pool logging
+    DATABASE_URL,
+    echo=False,
+    echo_pool=False,
+    pool_pre_ping=True,
+    pool_recycle=3600,
+    future=True,
+    connect_args={
+        "server_settings": {"application_name": "dating_bot"},
+        "prepared_statement_cache_size": 0,
+    },
+    logging_name=None
+)
     pool_pre_ping=True,
     pool_recycle=3600,
     future=True,
